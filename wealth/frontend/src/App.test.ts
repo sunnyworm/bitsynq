@@ -187,5 +187,42 @@ describe('Wealth App', () => {
 		});
 		expect(wrapper.text()).toContain('宜蘭建業段 B5 標的 presets loaded successfully.');
 	});
+
+	it('supports role impersonation switcher, donut chart, pdf pagination, and canvas elements', async () => {
+		const wrapper = mount(App);
+
+		await wrapper.get('input[placeholder="Deal ID"]').setValue('deal-1');
+		await wrapper.get('button[data-test="refresh-deal"]').trigger('click');
+		await flushPromises();
+
+		// PDF page view first page title
+		expect(wrapper.text()).toContain('PROPERTY CO-OWNERSHIP DETAILS');
+
+		// PDF page navigation
+		const pageNextBtn = wrapper.findAll('.page-nav-btn').filter(btn => btn.text() === '>');
+		expect(pageNextBtn.length).toBe(1);
+		
+		await pageNextBtn[0].trigger('click'); // Page 2
+		expect(wrapper.text()).toContain('SHARE ALLOCATIONS & FUNDING');
+
+		await pageNextBtn[0].trigger('click'); // Page 3 (Last page)
+		expect(wrapper.text()).toContain('GOVERNANCE & MINTING RULES');
+
+		// Canvas drawing element
+		const canvas = wrapper.find('.sig-canvas');
+		expect(canvas.exists()).toBe(true);
+
+		// Donut chart segments
+		const donutSegments = wrapper.findAll('.donut-segment');
+		expect(donutSegments.length).toBeGreaterThan(0);
+
+		// Impersonate first participant
+		const impersonatorCard = wrapper.find('.impersonator-card');
+		expect(impersonatorCard.exists()).toBe(true);
+		await impersonatorCard.trigger('click');
+		await flushPromises();
+
+		expect(api.createSignerSession).toHaveBeenCalledWith('deal-1', { participant_id: 'participant-1' });
+	});
 });
 
