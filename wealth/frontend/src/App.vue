@@ -345,8 +345,8 @@
                     @mousemove="draw"
                     @mouseup="stopDraw"
                     @mouseleave="stopDraw"
-                    @touchstart="startDraw"
-                    @touchmove="draw"
+                    @touchstart.prevent="startDraw"
+                    @touchmove.prevent="draw"
                     @touchend="stopDraw"
                   ></canvas>
                   <div class="canvas-placeholder" v-if="!hasSignature">Sign here by drawing...</div>
@@ -579,6 +579,8 @@ const mintForm = reactive({
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const isDrawing = ref(false);
 const hasSignature = ref(false);
+const lastX = ref(0);
+const lastY = ref(0);
 
 // PDF Viewer State
 const pdfPageIndex = ref(0);
@@ -945,19 +947,23 @@ function draw(e: MouseEvent | TouchEvent) {
     }
   }
 
-  const x = clientX - rect.left;
-  const y = clientY - rect.top;
+  const x = (clientX - rect.left) * (canvas.width / rect.width);
+  const y = (clientY - rect.top) * (canvas.height / rect.height);
 
   ctx.lineWidth = 2.5;
   ctx.lineCap = 'round';
   ctx.strokeStyle = '#cbd5e1';
 
   if (e.type === 'mousedown' || e.type === 'touchstart') {
-    ctx.beginPath();
-    ctx.moveTo(x, y);
+    lastX.value = x;
+    lastY.value = y;
   } else {
+    ctx.beginPath();
+    ctx.moveTo(lastX.value, lastY.value);
     ctx.lineTo(x, y);
     ctx.stroke();
+    lastX.value = x;
+    lastY.value = y;
     hasSignature.value = true;
   }
 }
