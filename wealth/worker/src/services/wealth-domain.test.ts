@@ -51,6 +51,22 @@ describe('wealth domain', () => {
 		})).toEqual({ valid: false, errors: ['share_pct must be a number'] });
 	});
 
+	it('rejects a participant with non-string cash_amount', () => {
+		expect(validateParticipantInput({
+			display_name: 'Signer One',
+			email: 'signer@example.com',
+			cash_amount: 1000 as any,
+		})).toEqual({ valid: false, errors: ['cash_amount must be a string'] });
+	});
+
+	it('rejects a participant with non-string loan_amount', () => {
+		expect(validateParticipantInput({
+			display_name: 'Signer One',
+			email: 'signer@example.com',
+			loan_amount: 500 as any,
+		})).toEqual({ valid: false, errors: ['loan_amount must be a string'] });
+	});
+
 	it('blocks minting before signing is completed', () => {
 		expect(canMintOwnership({ signing_status: 'pending' })).toEqual({ allowed: false, reason: 'Signing must be completed before minting ownership' });
 	});

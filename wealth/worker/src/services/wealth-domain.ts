@@ -42,6 +42,12 @@ export function validateParticipantInput(input: Partial<Record<keyof AddWealthPa
 	if (input.share_pct !== undefined && typeof input.share_pct !== 'number') {
 		errors.push('share_pct must be a number');
 	}
+	if (input.cash_amount !== undefined && typeof input.cash_amount !== 'string') {
+		errors.push('cash_amount must be a string');
+	}
+	if (input.loan_amount !== undefined && typeof input.loan_amount !== 'string') {
+		errors.push('loan_amount must be a string');
+	}
 	return { valid: errors.length === 0, errors };
 }
 
